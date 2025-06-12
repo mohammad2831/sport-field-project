@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import SportFields, Question, Answer, AnonymousUserProfile , UserResponse
+from .models import SportFields, Question, Answer, AnonymousUserProfile , UserCategoryScore
 
 class SportSerializer(serializers.ModelSerializer):
     class Meta:
@@ -26,7 +26,15 @@ class AnonymousUserProfileSerializer(serializers.ModelSerializer):
         fields = ['age'] 
                                                       
 
-class UserResponseSerializer(serializers.ModelSerializer):
+class Question2ViewSerializer(serializers.Serializer):
+    
+    category = serializers.IntegerField(required=True)
+    score = serializers.FloatField(required=True)
+
+
+
+class UserCategoryScoreSerializer(serializers.ModelSerializer):
     class Meta:
-        model = UserResponse
-        fields = ['question', 'chosen_answer', 'text_answer'] 
+        model = UserCategoryScore
+        fields = ['category', 'score'] 
+        

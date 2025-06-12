@@ -30,7 +30,7 @@ class Question(models.Model):
     type = models.CharField(
         max_length=10,
         choices=QUESTION_TYPES,
-        default=CHOICE,  # پیش‌فرض سوالات چند گزینه‌ای هستند
+        default=CHOICE, 
         verbose_name="نوع سوال"
     )
 
@@ -41,6 +41,9 @@ class Question(models.Model):
 
     def __str__(self):
         return f"{self.id} - {self.text[:50]}... ({self.get_type_display()})"
+
+
+
 
 
 
@@ -69,30 +72,21 @@ class Answer(models.Model):
 
 
 
-class UserResponse(models.Model):
-    session_key = models.CharField(max_length=40, db_index=True, verbose_name="کلید سشن")
-    question = models.ForeignKey('Question', on_delete=models.CASCADE, verbose_name="سوال")
-    # برای سوالات چند گزینه‌ای
-    chosen_answer = models.ForeignKey(
-        'Answer',
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        verbose_name="پاسخ انتخاب شده"
-    )
-    # برای سوالات متنی
-    text_answer = models.TextField(null=True, blank=True, verbose_name="پاسخ متنی")
-    timestamp = models.DateTimeField(auto_now_add=True, verbose_name="زمان ثبت پاسخ")
+class UserCategoryScore(models.Model):
+
+    session_key = models.CharField(max_length=40,db_index=True,verbose_name="کلید سشن")
+    category = models.CharField(max_length=50,verbose_name="دسته بندی سوال")
+    score = models.FloatField(default=0,verbose_name="امتیاز کسب شده در این دسته بندی")
 
     class Meta:
-        verbose_name = "پاسخ کاربر"
-        verbose_name_plural = "پاسخ‌های کاربران"
-        unique_together = ('session_key', 'question')
+        verbose_name = "امتیاز دسته بندی کاربر"
+        verbose_name_plural = "امتیازات دسته بندی کاربران"
+        # تضمین می‌کند که هر کاربر در یک سشن، فقط یک امتیاز برای هر دسته‌بندی داشته باشد.
+        unique_together = ('session_key', 'category')
 
     def __str__(self):
-        answer_text = self.chosen_answer.text if self.chosen_answer else self.text_answer
-        return f"سشن {self.session_key[:10]}... - سوال: {self.question.id} - پاسخ: {answer_text[:50]}..."
-    
+        return f"سشن {self.session_key[:10]}... - دسته: {self.category} - امتیاز: {self.score}"
+
 
 
 

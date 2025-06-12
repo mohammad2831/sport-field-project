@@ -1,0 +1,144 @@
+POST http://127.0.0.1:8000/sport/question-1/
+Content-Type: application/json
+Accept: application/json
+
+{
+  "age": 12
+}
+
+
+
+Response
+Status Codes:
+200 OK: Request successful, initial questions returned.
+400 Bad Request: Invalid input data (e.g., age missing or wrong format).
+Body (JSON - on 200 OK):
+JSON
+
+{
+    "category": "2",                       // The category ID for the returned questions
+    "message": "Profile saved and quiz started successfully.",
+    "session_id": "your_session_key_here", // The session ID for the current user's session
+    "initial_questions": [                 // Array of question objects for Category '2'
+        {
+        "id": 2,
+        "text": "مدت زمان تست دوی سرعت 20 متر",
+        "category": "2",
+        "type": "choice",
+        "answers": [
+            {
+                "id": 17,
+                "text": "کمتر از 3.6 ثانیه",
+                "points": 0,
+                "age": 10
+            },
+            {
+                "id": 18,
+                "text": "بین 3.6 تا 4.1 ثانیه",
+                "points": 0,
+                "age": 10
+            },
+            {
+                "id": 19,
+                "text": "بین 4.2 تا 4.6 ثانیه",
+                "points": 0,
+                "age": 10
+            },
+            {
+                "id": 20,
+                "text": "بیشتر از 4.6 ثانیه",
+                "points": 0,
+                "age": 10
+            }
+        ]
+        },
+
+        {
+        "id": 3,
+        "text": "مدت زمان تست دوی زیگزاگ",
+        "category": "2",
+        "type": "choice",
+        "answers": [
+            {
+                "id": 57,
+                "text": "کمتر از 9 ثانیه",
+                "points": 0,
+                "age": 10
+            },
+            {
+                "id": 58,
+                "text": "بین 9 تا 10.5 ثانیه",
+                "points": 0,
+                "age": 10
+            },
+            {
+                "id": 59,
+                "text": "بین 10.6 تا 12 ثانیه",
+                "points": 0,
+                "age": 10
+            },
+            {
+                "id": 60,
+                "text": "بیشتر از 12 ثانیه",
+                "points": 0,
+                "age": 10
+            }
+        ]
+        },
+    
+        // ... more question objects for Category '2'
+    ]
+}
+Body (JSON - on 400 Bad Request):
+JSON
+
+{
+    "age": [
+        "This field is required." // Or other validation errors
+    ]
+}
+
+
+
+##############################3
+
+
+Request
+POST URL: http://localhost:8000/sport/question-2/
+Headers:
+Content-Type: application/json
+Body (JSON):
+JSON
+
+{
+    "category": "2",                 // The category just completed (e.g., '2' from the previous step)
+    "score": 75,                     // The total calculated score for the completed category
+           
+}
+
+
+Response
+Status Codes:
+    200 OK: Request successful, next questions returned.
+    400 Bad Request: Invalid input data (e.g., missing category/score, user age not set).
+    404 Not Found: User profile not found for the session (unlikely if question1 was called first).
+
+Body (JSON - on 200 OK when there are more questions):
+JSON
+
+{
+    "category": "3",                       // The category ID for the returned questions
+    "session_id": "your_session_key_here",
+    "next_questions": [                    // Array of question objects for Category '3'
+        {
+            "id": 5,
+            "text": "Question 5 text...",
+            "category": "3",
+            "type": "choice",
+            "answers": [
+                // ... answer objects ...
+            ]
+        },
+        // ... more question objects for Category '3'
+    ]
+}
