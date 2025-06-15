@@ -1,28 +1,17 @@
-###############
-POST http://127.0.0.1:8000/sport/question-1/
+#########################
+POST http://127.0.0.1:8000/sport/question/1/
 Content-Type: application/json
 Accept: application/json
 
 {
   "age": 12
 }
-
-#########################3
-POST http://127.0.0.1:8000/sport/question-2
+#########################
+POST http://127.0.0.1:8000/sport/question/2/
 Content-Type: application/json
 Accept: application/json
 
 {
   "category":2,
-  "score":10 
-}
-
-#########################
-POST http://127.0.0.1:8000/sport/qestion-finnal/
-Content-Type: application/json
-Accept: application/json
-
-{
-  "category":5,
-  "score":10 
+  "score":1 
 }

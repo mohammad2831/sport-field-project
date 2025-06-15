@@ -42,12 +42,6 @@ class Question(models.Model):
     def __str__(self):
         return f"{self.id} - {self.text[:50]}... ({self.get_type_display()})"
 
-
-
-
-
-
-
 class Answer(models.Model):
     question = models.ForeignKey(
         'Question',
@@ -62,7 +56,6 @@ class Answer(models.Model):
     class Meta:
         verbose_name = "پاسخ"
         verbose_name_plural = "پاسخ‌ها"
-        unique_together = ('question', 'text')
 
     def __str__(self):
         return f"{self.question.id} - {self.text} - {self.points}"
@@ -74,14 +67,19 @@ class Answer(models.Model):
 
 class UserCategoryScore(models.Model):
 
-    session_key = models.CharField(max_length=40,db_index=True,verbose_name="کلید سشن")
+    session_key = models.ForeignKey( # تغییر نام فیلد از session_key به session
+        'AnonymousUserProfile', 
+        on_delete=models.CASCADE, # <--- تغییر مهم: اگر پروفایل ناشناس حذف شود، امتیازاتش هم حذف می‌شود.
+        to_field='session_key',  # <--- کلید خارجی به فیلد session_key مدل AnonymousUserProfile اشاره می‌کند
+        db_index=True,
+        verbose_name="سشن کاربر ناشناس"
+    )
     category = models.CharField(max_length=50,verbose_name="دسته بندی سوال")
     score = models.FloatField(default=0,verbose_name="امتیاز کسب شده در این دسته بندی")
 
     class Meta:
         verbose_name = "امتیاز دسته بندی کاربر"
         verbose_name_plural = "امتیازات دسته بندی کاربران"
-        # تضمین می‌کند که هر کاربر در یک سشن، فقط یک امتیاز برای هر دسته‌بندی داشته باشد.
         unique_together = ('session_key', 'category')
 
     def __str__(self):

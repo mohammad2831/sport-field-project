@@ -8,6 +8,8 @@ from rest_framework import status
 from django.db import transaction 
 from django.db import models
 from .recommendation_engine import recommendation
+from django.db import IntegrityError # <-- IntegrityError را ایمپورت کنید
+from django.db.models import Prefetch
 class InfoOneView(APIView):
     def get(self, request):
         print("hi this a test")
@@ -34,12 +36,12 @@ class QuestonInitialView(APIView):
                   
                 }
             )
-            user_age = 10
-            initial_questions = Question.objects.filter(category='2',min_age__lte=user_age,  max_age__gte=user_age   
+            
+            initial_questions = Question.objects.filter(category='2',min_age__lte=age_input,  max_age__gte=age_input   
             ).prefetch_related(
                 models.Prefetch(
                     'answers',
-                    queryset=Answer.objects.filter(age=user_age)  
+                    queryset=Answer.objects.filter(age=age_input)  
                 )
             )
                 
@@ -57,7 +59,6 @@ class QuestonInitialView(APIView):
 
 
 
-
 class QuestionView(APIView):
     def post(self, request, id_q):
         try:
@@ -67,16 +68,13 @@ class QuestionView(APIView):
         except ValueError:
             return Response({'error': 'Category ID must be an integer.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        
-
         session_key = request.session.session_key
         serdata = Question2ViewSerializer(data=request.data)
         if serdata.is_valid():
-            
             category = serdata.validated_data['category']
             score = serdata.validated_data['score']
 
-            try:   
+            try:
                 user_profile = AnonymousUserProfile.objects.get(session_key=session_key)
             except AnonymousUserProfile.DoesNotExist:
                 return Response({'error': 'User profile not found for this session.'}, status=status.HTTP_404_NOT_FOUND)
@@ -86,44 +84,47 @@ class QuestionView(APIView):
             else:
                 return Response({'error': 'User age is not set in the profile.'}, status=status.HTTP_400_BAD_REQUEST)
             
-            with transaction.atomic(): 
+            with transaction.atomic():
+                try:
                     UserCategoryScore.objects.update_or_create(
-                        session_key=session_key,
+                        session_key=user_profile,  # استفاده از نمونه user_profile به جای رشته session_key
                         category=category,
-                        score=score
+                        defaults={'score': score}  # استفاده از defaults برای به‌روزرسانی امتیاز
                     )
+                except IntegrityError:
+                    print(f"Warning: IntegrityError caught for session {session_key}, category {category}. "
+                          "Record likely already exists due to race condition. Continuing...")
+                    pass 
 
-
-            if id_q == 12: 
+            if id_q == 12:
                 recommendation_results = recommendation(session_key)
-
-
-
-
-            else: 
-
-                next_questions = Question.objects.filter(category=id_q+1 ,min_age__lte=user_age,  max_age__gte=user_age   
+                return Response({
+                    'message': recommendation_results,
+                }, status=status.HTTP_200_OK)
+            else:
+                next_questions = Question.objects.filter(
+                    category=id_q + 1,
+                    min_age__lte=user_age,
+                    max_age__gte=user_age
                 ).prefetch_related(
                     models.Prefetch(
                         'answers',
-                        queryset=Answer.objects.filter(age=user_age)  
+                        queryset=Answer.objects.filter(age=user_age)
                     )
                 )
                     
                 question_serializer = QuestionSerializer(next_questions, many=True)
 
                 return Response({
-                    'category': '{}'.format(id_q+1),
-                    'session_id': session_key, 
+                    'category': str(id_q + 1),
+                    'session_id': session_key,
                     'next_questions': question_serializer.data
                 }, status=status.HTTP_200_OK)
         else:
-            
             return Response(serdata.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
-           
 
 
 
@@ -131,6 +132,36 @@ class QuestionView(APIView):
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""
 class QuestionFinnalView(APIView):
     def post(self, request):
         session_key = request.session.session_key
@@ -175,7 +206,7 @@ class QuestionFinnalView(APIView):
 
 
 
-           
+   """        
 
 
 
@@ -221,8 +252,6 @@ class Question3View(APIView):
 
 
 """
-
-
 class SubmitResponsesAPIView(APIView):
 
     def post(self, request, *args, **kwargs):
