@@ -22,8 +22,8 @@ def recommendation(session_key: str):
         user_age = anonymous_profile.age if anonymous_profile.age is not None else None
         
 
-        categories_group1 = {'2', '3', '4', '5', '6', '7'}
-        categories_group2 = {'8','9','10','11','12','13'}
+        categories_group1 = {'2', '3', '4', '5', '6' }
+        categories_group2 = {'7','8','9','10','11','12','13'}
 
 
 
