@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib import admin
-from .models import Question, Answer
+from .models import Question, Answer, ResultUser
 
 class AnswerForm(forms.ModelForm):
     class Meta:
@@ -35,3 +35,15 @@ class QuestionAdmin(admin.ModelAdmin):
         if obj and obj.type != Question.CHOICE:
             return []
         return super().get_inline_instances(request, obj)
+
+
+
+
+@admin.register(ResultUser)
+class ResultUserAdmin(admin.ModelAdmin):
+    # فیلدهایی که در لیست نمایش داده می‌شوند
+    list_display = ('full_name', 'age', 'result', 'time')
+    # فیلدهایی که قابل جستجو هستند
+    search_fields = ('full_name', 'result')
+    # فیلدهایی که می‌توان بر اساس آن‌ها فیلتر کرد
+    list_filter = ('age', 'time')

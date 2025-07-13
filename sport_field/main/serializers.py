@@ -20,10 +20,11 @@ class QuestionSerializer(serializers.ModelSerializer):
 
 class AnonymousUserProfileSerializer(serializers.ModelSerializer):
     age = serializers.IntegerField(required=True) 
+    full_name = serializers.CharField(required = True)
     
     class Meta:
         model = AnonymousUserProfile
-        fields = ['age'] 
+        fields = ['age','full_name'] 
                                                       
 
 class Question2ViewSerializer(serializers.Serializer):

@@ -67,10 +67,10 @@ class Answer(models.Model):
 
 class UserCategoryScore(models.Model):
 
-    session_key = models.ForeignKey( # تغییر نام فیلد از session_key به session
+    session_key = models.ForeignKey( 
         'AnonymousUserProfile', 
-        on_delete=models.CASCADE, # <--- تغییر مهم: اگر پروفایل ناشناس حذف شود، امتیازاتش هم حذف می‌شود.
-        to_field='session_key',  # <--- کلید خارجی به فیلد session_key مدل AnonymousUserProfile اشاره می‌کند
+        on_delete=models.CASCADE, 
+        to_field='session_key',
         db_index=True,
         verbose_name="سشن کاربر ناشناس"
     )
@@ -91,22 +91,27 @@ class UserCategoryScore(models.Model):
 
 
 class AnonymousUserProfile(models.Model):
-
+    full_name = models.CharField(max_length=200, unique=False,default='Anonymous User')
     session_key = models.CharField(
         max_length=40,
-        unique=True, # هر session_key فقط یک پروفایل را نشان می‌دهد.
+        unique=True,
         verbose_name="session key"
     )
     age = models.IntegerField(null=True, blank=True, verbose_name="سن")
+
     
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد") # زمان ساخت رکورد
-    updated_at = models.DateTimeField(auto_now=True, verbose_name="تاریخ بروزرسانی") # زمان آخرین بروزرسانی رکورد
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد") 
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="تاریخ بروزرسانی") 
 
     class Meta:
         verbose_name = "پروفایل کاربر ناشناس"
         verbose_name_plural = "پروفایل‌های کاربران ناشناس"
 
     def __str__(self):
-        # نمایش خلاصه session_key برای خوانایی بیشتر در پنل ادمین و لاگ‌ها
         return f"پروفایل سشن: {self.session_key[:10]}..." if self.session_key else "پروفایل ناشناس"
 
+class ResultUser(models.Model):
+    full_name = models.TextField(max_length=200,unique=False)
+    age = models.IntegerField(default=0)
+    result = models.TextField(max_length=250, unique=False)
+    time = models.TimeField()

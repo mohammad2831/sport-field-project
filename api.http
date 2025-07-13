@@ -4,6 +4,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
+  "full_name":"mmd",
   "age": 12
 }
 #########################

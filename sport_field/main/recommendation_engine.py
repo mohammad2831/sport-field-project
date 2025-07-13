@@ -1,9 +1,7 @@
-from.models import UserCategoryScore , AnonymousUserProfile
+from.models import UserCategoryScore , AnonymousUserProfile, ResultUser
 from django.db.models import Sum
 from django.db import transaction 
-
-
-
+from datetime import datetime
 
 def recommendation(session_key: str):
 
@@ -20,10 +18,12 @@ def recommendation(session_key: str):
         
 
         user_age = anonymous_profile.age if anonymous_profile.age is not None else None
-        
+        user_name = anonymous_profile.full_name
+        time = datetime.now()
 
         categories_group1 = {'2', '3', '4', '5', '6' }
-        categories_group2 = {'7','8','9','10','11','12','13'}
+        categories_group2 = {'7','8','9','10','11'}
+        #add 12 and 13 after fix db
 
 
 
@@ -39,31 +39,40 @@ def recommendation(session_key: str):
         ).aggregate(total_sum=Sum('score'))
         total_score_group2: float = float(sum_group2_result.get('total_sum') or 0) 
 
-        avg_group1= total_score_group1 / 6
-        avg_group2= total_score_group2 / 6
-
+        avg_group1 = total_score_group1 / len(categories_group1) if len(categories_group1) > 0 else 0
+        avg_group2 = total_score_group2 / len(categories_group2) if len(categories_group2) > 0 else 0
         
-        with transaction.atomic(): 
-            deleted_profiles_count, _ = AnonymousUserProfile.objects.filter(session_key=session_key).delete()
-            deleted_scores_count, _ = UserCategoryScore.objects.filter(session_key=session_key).delete()
-            print(f"Deleted {deleted_profiles_count} anonymous profiles and {deleted_scores_count} category scores for session {session_key}.")
         
         
         if avg_group1 > avg_group2:
-            return{
-                'sport_recomend': 'فوتسال و شنا'
-            }
+                
+            sport_recomended= 'فوتسال و شنا'
+            
         elif avg_group1 < avg_group2:
-            return{
-                'sport_recomend': 'دوومیدانی'
-            }
-        else:{
-            'sport_recomend': 'فوتسال و دوومیدانی'
-        }
+                
+            sport_recomended= 'دو و میدانی'
+            
+        else:
+            sport_recomended= 'فوتسال و دوومیدانی'
+        
        
+
+        with transaction.atomic():
+            ResultUser.objects.create(
+                full_name=user_name,
+                age=user_age,
+                result=sport_recomended,
+                time=time
+            )
+            deleted_profiles_count, _ = AnonymousUserProfile.objects.filter(session_key=session_key).delete()
+            deleted_scores_count, _ = UserCategoryScore.objects.filter(session_key=session_key).delete()
+
+        return {
+            'sport_recomend': sport_recomended
+        }
+
     except Exception as e:
         return {'error': str(e), 'recommended_sports': []}
-
 
 
 

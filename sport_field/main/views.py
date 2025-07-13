@@ -29,10 +29,12 @@ class QuestonInitialView(APIView):
         
         if serializer.is_valid():
             age_input = serializer.validated_data.get('age')
+            name_input = serializer.validated_data.get('full_name')
             profile, created = AnonymousUserProfile.objects.update_or_create(
                 session_key=session_key,
                 defaults={
                     'age': age_input,
+                    'full_name': name_input,
                   
                 }
             )
@@ -63,7 +65,7 @@ class QuestionView(APIView):
     def post(self, request, id_q):
         try:
             id_q = int(id_q)
-            if not (2 <= id_q < 12):
+            if not (2 <= id_q <= 12):
                 return Response({'error': 'Invalid category ID. Category must be between 2 and 12.'}, status=status.HTTP_400_BAD_REQUEST)
         except ValueError:
             return Response({'error': 'Category ID must be an integer.'}, status=status.HTTP_400_BAD_REQUEST)
